@@ -1,6 +1,9 @@
 ﻿namespace TasteOfRiak_Ch01_CRUD
 {
     using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
     using RiakClient;
     using RiakClient.Models;
 
@@ -19,25 +22,48 @@
                 Console.WriteLine("Creating Objects In Riak...");
 
                 int val1 = 1;
-                var objectId = new RiakObjectId(bucket, "one");
-                var riakObject = new RiakObject(objectId, val1);
-                var result = client.Put(riakObject);
+                var objectId1 = new RiakObjectId(bucket, "one");
+                var riakObject1 = new RiakObject(objectId1, val1);
+                var result = client.Put(riakObject1);
                 CheckResult(result);
 
-                /*
                 string val2 = "two";
-                myBucket.store("two", val2).execute();
+                var objectId2 = new RiakObjectId(bucket, "two");
+                var riakObject2 = new RiakObject(objectId2, val2);
+                result = client.Put(riakObject2);
+                CheckResult(result);
 
-                StringIntMap val3 = new StringIntMap();
-                val3.put("myValue", 3);
-                myBucket.store("three", val3).execute();
+                var val3 = new Dictionary<string, int>
+                {
+                    { "myValue1", 3 },
+                    { "myValue2", 4 }
+                };
+                var objectId3 = new RiakObjectId(bucket, "three");
+                var riakObject3 = new RiakObject(objectId3, val3);
+                result = client.Put(riakObject3);
+                CheckResult(result);
 
-
-                // Reading Objects From Riak
                 Console.WriteLine("Reading Objects From Riak...");
 
-                Integer fetched1 = myBucket.fetch("one", Integer.class.execute();
+                var fetchResult1 = client.Get(objectId1);
+                CheckResult(fetchResult1);
+                RiakObject fetchObject1 = fetchResult1.Value;
+                int fetchVal1 = fetchObject1.GetObject<int>();
+                Debug.Assert(val1 == fetchVal1, "Assert Failed", "val1 {0} != fetchVal1 {1}", val1, fetchVal1);
 
+                var fetchResult2 = client.Get(objectId2);
+                CheckResult(fetchResult2);
+                RiakObject fetchObject2 = fetchResult2.Value;
+                string fetchVal2 = fetchObject2.GetObject<string>();
+                Debug.Assert(val2 == fetchVal2, "Assert Failed", "val2 {0} != fetchVal2 {1}", val2, fetchVal2);
+
+                var fetchResult3 = client.Get(objectId3);
+                CheckResult(fetchResult3);
+                RiakObject fetchObject3 = fetchResult3.Value;
+                var fetchVal3 = fetchObject3.GetObject<Dictionary<string, int>>();
+                Debug.Assert(val3.Count == fetchVal3.Count && !val3.Except(fetchVal3).Any(), "Assert Failed", "val3 {0} != fetchVal3 {1}", val3, fetchVal3);
+
+                /*
                 IRiakObject fetched2 = myBucket.fetch("two").execute();
                 StringIntMap fetched3 = myBucket.fetch("three", StringIntMap.class).execute();
 
@@ -83,7 +109,7 @@
                 client.shutdown();
                  */
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.Error.WriteLine("Exception: {0}", e.Message);
             }
